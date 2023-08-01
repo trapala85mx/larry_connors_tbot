@@ -3,6 +3,8 @@ import asyncio
 # Project
 from daos.asset_dao import AssetDao
 from services.asset_service import AssetService
+from services.binance import Binance
+from abstracts.exchange import Exchange
 from utils.errors.symbol_errors import NoSymbolError
 from utils.errors.symbol_errors import NoSymbolDataError
 from utils.errors.class_errors import ArgumentsMissingError
@@ -30,7 +32,10 @@ async def main():
         asset_dao = AssetDao()
         asset_service = AssetService(asset_dao=asset_dao)
         asset = asset_service.get_asset(symbol=symbol)
-
+        exchange : Exchange = Binance()
+        data = exchange.get_futures_klines(symbol=asset.symbol, interval="4h")
+        
+        
     except NoSymbolDataError as e:
         print(e)
     except ArgumentsMissingError as e:
