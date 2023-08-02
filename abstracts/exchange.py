@@ -11,27 +11,23 @@ class Exchange(metaclass=ABCMeta):
     
     @property
     @abstractmethod
-    def base_api_endpoint(self): pass
-    
-    
-    @property
-    @abstractmethod
-    def kline_api_endpoint(self): pass
-    
+    def _base_api_endpoint(self): pass
     
     @property
     @abstractmethod
-    def base_ws_url(self): pass
-    
-    
-    @property
-    @abstractmethod
-    def ws_raw_stream(self): pass
-    
+    def _kline_api_endpoint(self): pass
     
     @property
     @abstractmethod
-    def ws_combined_stream(self): pass
+    def _base_ws_url(self): pass
+    
+    @property
+    @abstractmethod
+    def _ws_raw_stream(self): pass
+    
+    @property
+    @abstractmethod
+    def _ws_combined_stream(self): pass
     
     
     @abstractmethod
@@ -41,4 +37,4 @@ class Exchange(metaclass=ABCMeta):
     def futures_kline_socket(self, symbol:str, interval:Timeframes) -> None : pass
     
     @abstractmethod
-    def _create_ws(self)
+    def _create_ws(self): pass

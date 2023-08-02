@@ -34,7 +34,7 @@ async def main():
         asset = asset_service.get_asset(symbol=symbol)
         exchange : Exchange = Binance()
         data = exchange.get_futures_klines(symbol=asset.symbol, interval="4h")
-        
+        print(data)
         
     except NoSymbolDataError as e:
         print(e)
