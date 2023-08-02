@@ -9,7 +9,7 @@ from utils.errors.symbol_errors import NoSymbolError
 from utils.errors.symbol_errors import NoSymbolDataError
 from utils.errors.class_errors import ArgumentsMissingError
 # External
-
+from pprint import pprint
 
 def ask_symbol() -> str:
     while True:
@@ -22,6 +22,10 @@ def ask_symbol() -> str:
             print(e)
             continue
 
+# FUNCION PARA PROBAR - ESTA SE ELIMINARÁ PORQUE IRÁ EN STRATEGY
+def handle_msg(msg: dict):
+    print(msg)
+
 
 async def main():
     # Se pregunta por el symbol
@@ -33,8 +37,10 @@ async def main():
         asset_service = AssetService(asset_dao=asset_dao)
         asset = asset_service.get_asset(symbol=symbol)
         exchange : Exchange = Binance()
-        data = exchange.get_futures_klines(symbol=asset.symbol, interval="4h")
-        print(data)
+        #data = await exchange.get_futures_klines(symbol=asset.symbol, interval="4h")
+        
+        await exchange.start_kline_socket([f"{asset.symbol.lower()}@kline_1m", f"{asset.symbol.lower()}@kline_5m"], handle_msg)
+        
         
     except NoSymbolDataError as e:
         print(e)
@@ -42,6 +48,7 @@ async def main():
         print(e)
     except TypeError as e:
         print(e)
+    
 
     print(f"Symbol a tradear: {symbol.upper()}")
 

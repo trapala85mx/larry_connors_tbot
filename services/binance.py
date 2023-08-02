@@ -1,10 +1,13 @@
 # Python
+from typing import List
+import json
 # Project
 from abstracts.exchange import Exchange
 from utils.enums.timeframes import Timeframes
 # Externals
 from decouple import config
 import requests as r
+import websockets
 
 
 class Binance(Exchange):
@@ -34,8 +37,12 @@ class Binance(Exchange):
     def _ws_combined_stream(self):
         return config(f"{self.NAME}_WEBSCOKET_COMBINED_STREAM")
     
+    @property
+    def MAX_STREAM_CONNECTION(self):
+        return config(f"{self.NAME}_MAX_STREAM_CONNECTIONS")
     
-    def get_futures_klines(self, symbol:str, interval:Timeframes, limit:int = 251) -> dict:
+    
+    async def get_futures_klines(self, symbol:str, interval:Timeframes, limit:int = 251) -> dict:
         try:
             params = {
                 'symbol': symbol.lower(),
@@ -55,11 +62,27 @@ class Binance(Exchange):
         except Exception as e:
             print(f"Unexpected error in get_futures_klines for {symbol.upper()}:\n{e}")
         
-        
+    
+    # suscripción a los klines
+    async def _subscribe(self, ws, streams:List[str]) -> None:
+        payload = {
+            "method": "SUBSCRIBE",
+            "params": streams,
+            "id":1
+        }
 
-    def futures_kline_socket(self, symbol:str, interval:Timeframes) -> None:
-        pass
+        await ws.send(json.dumps(payload))
     
-    
-    def _create_ws(self):
-        return super()._create_ws()
+    # Iniciar websocket
+    async def start_kline_socket(self, streams:List[str], callback) -> None:
+        if len(streams) < int(self.MAX_STREAM_CONNECTION):
+            async for websocket in websockets.connect(self._base_ws_url+self._ws_combined_stream):
+                try:
+                    await self._subscribe(websocket, streams)
+                    async for message in websocket:
+                        callback(json.loads(message))
+                    
+                except websockets.ConnectionClosed:
+                    continue
+                    
+        raise ValueError("Too many streams")
