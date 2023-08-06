@@ -8,7 +8,7 @@ from utils.errors.class_errors import ArgumentsMissingError
 
 def validate_class(args):
     def decorator(cls):
-        #@functools.wraps
+        @functools.wraps(cls)
         def wrapper(**kwargs):
             for a in args:
                 if not a in kwargs.keys():

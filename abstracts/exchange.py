@@ -33,9 +33,17 @@ class Exchange(metaclass=ABCMeta):
     @abstractmethod
     def MAX_STREAM_CONNECTION(self): pass
     
+    @property
+    @abstractmethod
+    def _ws(self): pass
+    
+    @_ws.setter
+    @abstractmethod
+    def _ws(self, ws): pass
+    
     
     @abstractmethod
     async def get_futures_klines(self, symbol:str, interval:Timeframes, limit:int = 251) -> dict: pass
     
     @abstractmethod
-    async def start_kline_socket(self, symbol:str, streams:list[str], callback) -> None : pass
+    async def start_kline_socket(self, streams:list[str], callback) -> None : pass

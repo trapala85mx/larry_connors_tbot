@@ -1,6 +1,7 @@
 # Python
-from typing import List
 import json
+import asyncio
+from typing import List
 # Project
 from abstracts.exchange import Exchange
 from utils.enums.timeframes import Timeframes
@@ -41,6 +42,13 @@ class Binance(Exchange):
     def MAX_STREAM_CONNECTION(self):
         return config(f"{self.NAME}_MAX_STREAM_CONNECTIONS")
     
+    @property
+    def _ws(self):
+        return None
+    
+    @_ws.setter
+    def _ws(self, ws):
+        pass
     
     async def get_futures_klines(self, symbol:str, interval:Timeframes, limit:int = 251) -> dict:
         try:
@@ -77,12 +85,9 @@ class Binance(Exchange):
     async def start_kline_socket(self, streams:List[str], callback) -> None:
         if len(streams) < int(self.MAX_STREAM_CONNECTION):
             async for websocket in websockets.connect(self._base_ws_url+self._ws_combined_stream):
-                try:
                     await self._subscribe(websocket, streams)
                     async for message in websocket:
-                        callback(json.loads(message))
-                    
-                except websockets.ConnectionClosed:
-                    continue
+                        await callback(json.loads(message))
                     
         raise ValueError("Too many streams")
+    
