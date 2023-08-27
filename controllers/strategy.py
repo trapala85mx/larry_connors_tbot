@@ -18,7 +18,11 @@ import talib as ta
 
 
 @dataclass(kw_only=True)
-class Strategy:    
+class Strategy:
+    """Class that contains all the logic fo analyzing data, when to sell and boy and when to call the notifier
+    Raises:
+        IntegrityDataError: When data is not continous
+    """    
     asset : Asset
     exchange : Exchange
     notifier : Notifier
@@ -33,6 +37,12 @@ class Strategy:
     
     
     async def _get_snapshot(self, interval: Timeframes, limit:int=500) -> None:
+        """Get the las "limi" klines in the exchange for analysis
+
+        Args:
+            interval (Timeframes): Enum that represent a timframe in this cases is 4 hours for this strategy
+            limit (int, optional): How many candles will retrieve from the exchange
+        """        
         klines = await self.exchange.get_futures_klines(self.asset.symbol, interval, limit)
         df = pd.DataFrame(klines)
         df = df.iloc[:len(klines)-1,:6]
@@ -73,6 +83,14 @@ class Strategy:
     }
     '''
     async def _update_snapshot(self, candle_df:pd.DataFrame):
+        """Update snapshot with last close kline obtained from websocket
+
+        Args:
+            candle_df (pd.DataFrame): Ls Kline closed
+
+        Raises:
+            IntegrityDataError: When timdelta is different from 4
+        """        
         # Revisamos que tengamos la diferencia entre velas adecuada al timeframe
         dif = (candle_df['open_time'].iloc[0] - self.snapshot['open_time'].tail(1).iloc[0]).total_seconds() / (1*60*60)
         
@@ -85,6 +103,8 @@ class Strategy:
 
     
     async def _get_indicators(self) -> None:
+        """Calculate all the indicators neceesary for the strategy
+        """        
         tasks = []
         tasks.append(asyncio.create_task(ma(self.snapshot.close, 11)))
         tasks.append(asyncio.create_task(ma(self.snapshot.close, 265)))
@@ -100,6 +120,11 @@ class Strategy:
     
     
     async def _process_kline_data(self, msg:dict) -> None:
+        """Process the data from websocket
+
+        Args:
+            msg (dict): data from websocket
+        """        
         if msg.get("stream"):
             candle_closed = msg.get('data', {}).get('k',{}).get('x', False)
             
@@ -169,6 +194,11 @@ class Strategy:
         
         
     async def _larry_connors_logic(self):
+        """Analyze data and send signal when requisites are fullfilled
+
+        Returns:
+            [dic]: msg with the data to send 
+        """        
         close = self.snapshot.tail(1)["close"].iloc[0]
         rsi = self.snapshot.tail(1)["rsi2"].iloc[0]
         ma11 = self.snapshot.tail(1)["ma11"].iloc[0]
@@ -204,6 +234,8 @@ class Strategy:
     
     
     async def _analyze(self) -> dict:
+        """Analyze the data via the larry connors strategy and send signal
+        """        
         # Lógica de prueba donde envía señal cuandl se cumple que RSI es menor a 9 o mayor a 74
         if not self.signal_sent:
             #await self._logica_señal_experimental() # Funciona Ok
@@ -213,10 +245,17 @@ class Strategy:
     
     
     async def _send_singal(self, msg:str) -> None:
+        """Uses the notifier to send singal
+
+        Args:
+            msg (str): msg to send
+        """        
         pprint(msg)
     
     
     async def start(self) -> None:
+        """starts the signal bot
+        """        
         #timeframe = Timeframes.TIMEFRAME_1minute.value
         timeframe = Timeframes.TIMEFRAME_4HOUR.value
         await self._get_snapshot(interval=timeframe)

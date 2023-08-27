@@ -12,7 +12,8 @@ import websockets
 
 
 class Binance(Exchange):
-    
+    """Class that represents a BinancExchange
+    """    
     NAME = "BINANCE"
     
     def __init__(self) -> None:

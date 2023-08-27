@@ -7,6 +7,8 @@ from utils.decorators.validators import validate_class
 @validate_class(args=["symbol", "price_precision", "qty_precision", "min_qty", "min_cost"])
 @dataclass(kw_only=True)
 class Asset:
+    """Class that represents an asset
+    """    
     symbol : str
     price_precision : int
     qty_precision : int

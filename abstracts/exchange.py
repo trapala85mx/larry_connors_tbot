@@ -8,7 +8,8 @@ from utils.enums.timeframes import Timeframes
 
 
 class Exchange(metaclass=ABCMeta):
-    
+    """Abstract Class that represents what an exhcange must do
+    """    
     @property
     @abstractmethod
     def _base_api_endpoint(self): pass

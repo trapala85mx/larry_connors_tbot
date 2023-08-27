@@ -6,6 +6,7 @@ from abc import abstractmethod
 
 
 class Notifier(metaclass=ABCMeta):
-    
+    """Abstract class that represents a Notifier that is in charge of show the mesage
+    """    
     @abstractmethod
     def send_signal(msg:str) -> None : pass

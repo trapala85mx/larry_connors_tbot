@@ -10,6 +10,8 @@ from utils.decorators.validators import validate_class
 @validate_class(args=['asset_dao'])
 @dataclass(kw_only=True)
 class AssetService:
+    """Class in charge of all the logic of an Asset such as validation and CRUD Operations
+    """    
     asset_dao : AssetDao
     
     

@@ -9,7 +9,8 @@ from utils.errors.symbol_errors import NoSymbolDataError
 
 @dataclass
 class AssetDao:
-    
+    """Class to retreive data from Database and all SQL querys to interact with Database
+    """    
     def get_asset(self, symbol:str):
         asset_data = data.get(symbol.lower(), None)
         
